@@ -13,8 +13,19 @@
   }
 }
 
+@keyframes slideOut {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-out {
+  animation: slideOut 0.3s ease-out forwards;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -26,4 +37,8 @@
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+.touch-pan-x {
+  touch-action: pan-x;
 }
