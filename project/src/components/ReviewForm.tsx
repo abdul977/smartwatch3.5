@@ -1,24 +1,14 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { MediaUpload } from './MediaUpload';
-
-interface UserReview {
-  id: string;
-  name: string;
-  rating: number;
-  comment: string;
-  date: string;
-  verified: boolean;
-  media: string[];
-}
+import { useReviewStore } from '../store/reviewStore';
 
 export function ReviewForm() {
+  const { addReview } = useReviewStore();
   const [name, setName] = useState('');
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [hoveredStar, setHoveredStar] = useState<number | null>(null);
-  const [reviews, setReviews] = useLocalStorage<UserReview[]>('user-reviews', []);
   const [submitted, setSubmitted] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
@@ -34,7 +24,7 @@ export function ReviewForm() {
       }))
     );
 
-    const newReview: UserReview = {
+    const newReview = {
       id: Date.now().toString(),
       name,
       rating,
@@ -44,7 +34,7 @@ export function ReviewForm() {
       media: mediaUrls,
     };
 
-    setReviews([newReview, ...reviews]);
+    addReview(newReview);
     setSubmitted(true);
     
     // Reset form
@@ -69,9 +59,7 @@ export function ReviewForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Your Name
-          </label>
+          <label className="block text-sm font-medium mb-1">Your Name</label>
           <input
             type="text"
             required
@@ -83,9 +71,7 @@ export function ReviewForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rating
-          </label>
+          <label className="block text-sm font-medium mb-1">Rating</label>
           <div className="flex space-x-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -109,9 +95,7 @@ export function ReviewForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Your Review
-          </label>
+          <label className="block text-sm font-medium mb-1">Your Review</label>
           <textarea
             required
             value={comment}
@@ -123,9 +107,7 @@ export function ReviewForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Add Photos/Videos
-          </label>
+          <label className="block text-sm font-medium mb-1">Add Photos/Videos</label>
           <MediaUpload
             onMediaSelect={setSelectedFiles}
             selectedFiles={selectedFiles}
@@ -140,54 +122,6 @@ export function ReviewForm() {
           Submit Review
         </button>
       </form>
-
-      {reviews && reviews.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4">Your Reviews</h3>
-          <div className="space-y-4">
-            {reviews.map((review) => (
-              <div key={review.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">{review.name}</span>
-                  <div className="flex items-center">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-600 mb-2">{review.comment}</p>
-                {review.media && review.media.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 my-2">
-                    {review.media.map((url, index) => (
-                      <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                        {url.startsWith('data:video/') ? (
-                          <video
-                            src={url}
-                            className="w-full h-full object-cover"
-                            controls
-                          />
-                        ) : (
-                          <img
-                            src={url}
-                            alt={`Review media ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="text-sm text-gray-500">
-                  {new Date(review.date).toLocaleDateString()}
-                  {review.verified && (
-                    <span className="ml-2 text-green-600">✓ Verified Purchase</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
